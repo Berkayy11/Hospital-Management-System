@@ -1,0 +1,153 @@
+TodayAppointments	
+CALCULATE(
+    COUNTROWS(Appointments),
+    FILTER(
+        Appointments,
+        INT(Appointments[AppointmentDate]) = TODAY()
+    )
+)
+
+ControlledAppointmentsToday	
+CALCULATE(
+    COUNTROWS(Appointments),
+    FILTER(
+        Appointments,
+        INT(Appointments[AppointmentDate]) = TODAY()
+            && Appointments[Control] = TRUE()
+    )
+)
+
+RemainingAppointmentsToday	
+CALCULATE(
+    COUNTROWS(Appointments),
+    FILTER(
+        Appointments,
+        INT(Appointments[AppointmentDate]) = TODAY()
+            && Appointments[Control] = FALSE()
+    )
+)
+
+BlankBeds	CALCULATE(COUNTROWS(Beds),Beds[IsOccupied] = FALSE())
+LastRefresh	NOW()
+BedOccupancyRate	
+DIVIDE(
+    CALCULATE(COUNTROWS(Inpatients), Inpatients[DischargeDate] = BLANK()),
+    COUNTROWS(Beds),
+    0
+)
+
+Number of working doctors	
+CALCULATE(
+    COUNTROWS(DoctorAvailability),
+    FILTER(
+        DoctorAvailability,
+        DoctorAvailability[IsOnLeave] = TRUE()
+            && DoctorAvailability[WorkDate] = TODAY()
+    )
+)
+
+DoctorOnLeaveToday	
+CALCULATE(
+    COUNTROWS(DoctorAvailability),
+    FILTER(
+        DoctorAvailability,
+        DoctorAvailability[IsOnLeave] = FALSE()
+            && DoctorAvailability[WorkDate] = TODAY()
+    )
+)
+
+InpatientTotal	CALCULATE(COUNTROWS(Inpatients),ISBLANK(Inpatients[DischargeDate]))
+TodayAdmissions	
+CALCULATE(
+    COUNTROWS(Inpatients),
+    FILTER(
+        Inpatients,
+        INT(Inpatients[AdmissionDate]) = INT(TODAY())
+    )
+)
+
+Today Discharges	
+CALCULATE(
+    COUNTROWS(Inpatients),
+    FILTER(
+        Inpatients,
+        Inpatients[DischargeDate] = INT(TODAY())
+    )
+)
+
+Available Beds	
+CALCULATE(
+    COUNTROWS(Beds),
+    FILTER(Beds, Beds[IsOccupied] = FALSE())
+)
+
+TodaysOccupancyRate	
+VAR TotalBeds = COUNTROWS(Beds)
+VAR OccupiedBeds = 
+    CALCULATE(
+        COUNTROWS(Inpatients),
+        FILTER(
+            Inpatients,
+            Inpatients[AdmissionDate] <= TODAY() &&
+            (ISBLANK(Inpatients[DischargeDate]) || Inpatients[DischargeDate] >= TODAY())
+        )
+    )
+RETURN
+    DIVIDE(OccupiedBeds, TotalBeds)
+
+TodayDischarges	
+CALCULATE(
+    COUNTROWS(Inpatients),
+    FILTER(
+        Inpatients,
+        Inpatients[DischargeDate] = TODAY()
+    )
+)
+
+
+PaidInvoicesToday	
+CALCULATE(
+    COUNTROWS(Invoices),
+    Invoices[Payment_Status] = "Paid",
+    Invoices[Payment_Date] = TODAY()
+)
+
+TotalIncomeToday	
+CALCULATE(
+    SUM(Invoices[Amount_Paid]),
+    Invoices[Payment_Status] = "Paid",
+    Invoices[Payment_Date] = TODAY()
+)
+
+TotalRevenue	
+CALCULATE(
+    SUM(Invoices[Amount_Paid]),
+    Invoices[Payment_Status] = "Paid"
+)
+
+MonthlyIncome	
+CALCULATE(
+    SUM(Invoices[Amount_Paid]),
+    FILTER(
+        Invoices,
+        MONTH(Invoices[Payment_Date]) = MONTH(TODAY()) &&
+        YEAR(Invoices[Payment_Date]) = YEAR(TODAY())
+    )
+)
+
+TotalPaid_ByDepartment	
+CALCULATE(
+    SUM(Invoices[Amount_Paid]),
+    FILTER(
+        Invoices,
+        Invoices[AppointmentID] IN 
+        SELECTCOLUMNS(
+            FILTER(
+                Appointments,
+                RELATED(Doctors[DepartmentID]) IN VALUES(Departments[DepartmentID])
+            ),
+            "AppointmentID", Appointments[AppointmentID]
+        )
+    )
+)
+
