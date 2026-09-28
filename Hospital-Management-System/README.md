@@ -143,7 +143,7 @@ Dashboard’larda DAX formülleri kullanılarak hesaplamalar yapılmıştır.  K
 
 ---
 
-> 💡 Bu proje, hem bireysel portföy sunumu hem de sağlık sektörü üzerine veri odaklı çözüm geliştirme pratiği açısından güçlü bir örnektir.
+> 💡 Bu proje, SQL Server üzerinde ilişkisel veri modeli oluşturma, iş kurallarını T-SQL ile uygulama ve Power BI kullanarak operasyonel ve finansal verileri analiz etme pratiği amacıyla geliştirilmiştir.
 
 ### 🧾 Sürüm Bilgisi
 
